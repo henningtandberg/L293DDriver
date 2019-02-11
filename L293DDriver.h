@@ -28,6 +28,8 @@
 #ifndef _L293DDRIVER_H
 #define _L293DDRIVER_H
 
+#include "Arduino.h"
+
 /** Default pins if not specified */
 #define M1_IN_PIN1  8
 #define M1_IN_PIN2  7
@@ -48,9 +50,10 @@
 
 class L293DDCMotor {
     public:
-        L293DMotor(uint8_t pwmPin, uint8_t inPin1, uint8_t inPin2);
-        L293DMotor(void);
+        L293DDCMotor(uint8_t pwmPin, uint8_t inPin1, uint8_t inPin2);
+        L293DDCMotor(void);
 
+        void init(void);
         void setSpeed(uint8_t speed);
         void drive(uint8_t direction);
 
