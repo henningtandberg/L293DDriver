@@ -21,7 +21,7 @@ void setup() {
 
     for(int i = 0; i < sizeof(testspeeds); i++) { 
         Serial.println("- Speed set to: " + (String)testspeeds[i]);
-        m1->setSpeed(motor, testspeeds[i]);
+        m1->setSpeed(testspeeds[i]);
 
         Serial.println("- - Drive FORWARDS for 2 seconds.");
         m1->drive(DIR_FWD);
@@ -44,7 +44,7 @@ void setup() {
 
     for(int i = 0; i < sizeof(testspeeds); i++) { 
         Serial.println("- Speed set to: " + (String)testspeeds[i]);
-        m1->setSpeed(motor, testspeeds[i]);
+        m1->setSpeed(testspeeds[i]);
 
         Serial.println("- - Drive FORWARDS for 2 seconds.");
         m1->drive(DIR_FWD);
