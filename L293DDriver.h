@@ -29,47 +29,48 @@
 #define _L293DDRIVER_H
 
 /** Default pins if not specified */
-#define MOT1_CTRL1  8
-#define MOT1_CTRL2  7
-#define MOT2_CTRL1  4
-#define MOT2_CTRL2  3
+#define M1_IN_PIN1  8
+#define M1_IN_PIN2  7
+#define M2_IN_PIN1  4
+#define M2_IN_PIN2  3
+#define M1_PWM_PIN  11
+#define M2_PWM_PIN  10
 
 /** Motor directrions */
-#define DIR_FWD     1
-#define DIR_BWD     0
+#define DIR_FWD     0
+#define DIR_BWD     1
+#define DIR_STOP    2
 
 /** Indecies of motors */
-#define MOT_1       0
-#define MOT_2       1
-#define MOT_ALL     2
+#define M1          0
+#define M2          1
+#define MALL        2
 
-/* struct motor - Values assosiated with a motor
- *  @ctrl1: Control pin 1
- *  @ctrl2: Control pin 2
- *  @ep:    PWM pin
- *  @spd:   Current speed of motor
- *  @dir:   Current directon of motor
- */
-typedef struct motor {
-    uint8_t ctrl1;
-    uint8_t ctrl2;
-    uint8_t ep;
-    uint8_t spd;
-    uint8_t dir;
-} Motor;
+class L293DDCMotor {
+    public:
+        L293DMotor(uint8_t pwmPin, uint8_t inPin1, uint8_t inPin2);
+        L293DMotor(void);
+
+        void setSpeed(uint8_t speed);
+        void drive(uint8_t direction);
+
+    private:
+        uint8_t pwmPin;
+        uint8_t inPin1;
+        uint8_t inPin2;
+        uint8_t speed;
+        uint8_t direction;
+};
 
 class L293DDriver {
     public:
-        L293DDriver(int mot1_ctrl1, int mot1_ctrl2, int mot2_ctrl1, int mot2_ctrl2, int mot1_ep, int mot2_ep);
-        L293DDriver(int mot1Ctrl1, int mot1int ep1, int ep2);
-        int init(void);
-        void setSpeed(int motor, uint8_t speed);
-        void setDirection(int motor, int direction);
-        void drive(int motor);
-        void stop(int motor);
+        L293DDriver(uint8_t m1_inPin1, uint8_t m1_inPin2, uint8_t m2_inPin1, uint8_t m2_inPin2, uint8_t m1_pwmPin, uint8_t m2_pwmPin);
+        L293DDriver(uint8_t m1_pwmPin, uint8_t m2_pwmPin);
+        void begin(void);
+        L293DDCMotor * getDCMotor(uint8_t motor);
 
     private:
-        Motor motor[MOT_ALL];
+        L293DDCMotor dcmotors[MALL];
 };
 
 #endif

@@ -1,125 +1,113 @@
 #include "L293DDriver.h"
 #include "Arduino.h"
 
-/** L293DDRiver() - Contructor 1.
- *  @mot1_ctrl1:
- *  @mot1_ctrl2:
- *  @mot2_ctrl1:
- *  @mot2_ctrl2:
- *  @mot1_ep:
- *  @mot2_ep:
- *
+/**
+ *  L293DDriver
  */
-L293DDriver::L293DDriver(int mot1_ctrl1, int mot1_ctrl2, int mot2_ctrl1, int mot2_ctrl2, int mot1_ep, int mot2_ep) {
-   motors[MOT_1] = {
-        .ctrl1 = mot1_ctrl1,
-        .ctrl2 = mot1_ctrl2,
-        .ep = mot1_ep,
-        .spd = 0,
-        .dir = DIR_FWD
-    };    
-    motors[MOT_2] = {
-        .ctrl1 = mot2_ctrl1,
-        .ctrl2 = mot2_ctrl2,
-        .ep = mot2_ep,
-        .spd = 0,
-        .dir = DIR_FWD
-    };
+
+/** L293DDRiver() - Contructor 1.
+ *  @m1_inPin1:
+ *  @m1_inPin2:
+ *  @m2_inPin1:
+ *  @m2_inPin2:
+ *  @m1_pwmPin:
+ *  @m2_pwmPin:
+ *
+ */        
+L293DDriver(uint8_t m1_inPin1, uint8_t m1_inPin2, uint8_t m2_inPin1, uint8_t m2_inPin2, uint8_t m1_pwmPin, uint8_t m2_pwmPin) {
+    dcmotors[M1] = L293DDCMotor(m1_pwnPin, m1_inPin1, m1_inPin2);
+    dcmotors[M2] = L293DDCMotor(m2_pwnPin, m2_inPin1, m2_inPin2); 
 }
 
 /** L293DDriver() - Contructor 2.
- *  @mot1_ep:
- *  @mot2_ep:
+ *  @m1_pwm:
+ *  @m2_pwm:
  *
  */
-L293DDriver::L293DDriver(int mot1_ep, int mot2_ep) {
-    this->L293Driver(
-        MOT1_CTRL1,
-        MOT1_CTRL2,
-        MOT2_CTRL1,
-        MOT2_CTRL2,
-        mot1_ep,
-        mot2_ep
-    );
+L293DDriver(uint8_t m1_pwmPin, uint8_t m2_pwmPin);
+    this->L293Driver(M1_IN_PIN1, M1_IN_PIN2, M2_IN_PIN1, M2_IN_PIN2, M1_PWM_PIN, M2_PWM_PIN);
 }
 
 /** init() - Initializes the driver.
  *
  */
-void L293DDriver::init(void) {
-    if(motors[MOT_1].ep == motors[MOT_2].ep)
+void L293DDriver::begin(void) {
+    if(dcmotors[M1].pwmPin == dcmotors[M2].pwmPin)
         while(1);
 
     // TODO: isPWM
     
-    for (int i = 0; i < MOT_ALL; i++) {
-        pinMode(motors[i].ep, OUTPUT);
-        pinMode(motors[i].ctrl1, OUTPUT);
-        pinMode(motors[i].ctrl2, OUTPUT);
+    for (int i = 0; i < MALL; i++) {
+        pinMode(dcmotors[i].pwmPin, OUTPUT);
+        pinMode(dcmotors[i].inPin1, OUTPUT);
+        pinMode(dcmotors[i].inPin2, OUTPUT);
+
+        digitalWrite(dcmotors[i].pwmPin, LOW);
+        digitalWrite(dcmotors[i].inPin1, LOW);
+        digitalWrite(dcmotors[i].inPin2, LOW);
     }
 }
 
+
+L293DDCMotor * L293DDriver::getDCMotor(uint8_t motor) {
+    if (motor < M1 || motor > M2) {
+        return NULL;
+    }
+
+    return &dcmotors[motor];
+} 
+/**
+ *  L293DDCMotor
+ */
+
+/**
+ *
+ */
+L293DDCMotor::L293DDCMotor(uint8_t pwmPin, uint8_t inPin1, uint8_t inPin2) {
+    this->pwmPin = pwmPin;
+    this->inPin1 = inPin1;
+    this->inPin2 = inPin2;
+    this->speed = 0;
+    this->direction = DIR_STOP;
+}
+
+/**
+ *
+ */
+L293DDCMotor::L293DDCMotor(void) {
+    this->pwmPin = 0;
+    this->inPin1 = 0;
+    this->inPin2 = 0;
+    this->speed = 0;
+    this->direction = DIR_STOP;
+}
+
 /** setSpeed() - Sets the speed of the specified motor.
- *  @motor:
  *  @speed:
  *
  */
-void L293DDriver::setSpeed(int motor, uint8_t speed) {
-
-    if (motor > MOT_ALL || motor < MOT_1)
-        return;
-
-    if (motor == MOT_ALL)
-        for (int i = 0; i < MOT_ALL; i++)
-            motors[i].spd = speed;
-    else
-        motors[motor].spd = speed;
-
+void L293DDCMotor::setSpeed(uint8_t speed) {
+    this->speed = speed;
+    analogWrite(this->pwmPin, this->speed);
 }
 
 /** setDirection() - Sets the direction of the specified motor.
- *  @motor:
  *  @direction:
  *
  */
-void L293DDriver::direction(int motor, int dir) {
-    /*if(dir) {
-
-    } else {
-
-    }*/
-}
-
-/** drive() - Activates the specified motor.
- *  @motor:
- *
- */
-void L293DDriver::drive(int motor) {
-
-    if (motor > MOT_ALL || motor < MOT_1)
-        return;
-
-    if (motor == MOT_ALL)
-        for (int i = 0; i < MOT_ALL; i++)
-            analogWrite(motors[i].ep, motors[i].spd);
-    else
-        analogWrite(motors[motor].ep, motors[i].spd);
-
-}
-
-/** stop() - Deactivates the specified motor.
- *  @motor:
- *
- */
-void L293DDriver::stop(int motor) {
-
-    if (motor > MOT_ALL || motor < MOT_1)
-        return;
-
-    if (motor == MOT_ALL)
-        for (int i = 0; i < MOT_ALL; i++)
-            analogWrite(motors[i].ep, LOW);
-    else
-        analogWrite(motors[motor].ep, LOW);
-
+void L293DDCMotor::drive(uint8_t direction) {
+    switch (direction) {
+        case DIR_FWD:
+            digitalWrite(this->inPin1, LOW);
+            digitalWrite(this->inPin2, HIGH);
+            break;
+        case DIR_BWD:
+            digitalWrite(this->inPin2, LOW);
+            digitalWrite(this->inPin1, HIGH);
+            break;
+        case DIR_STOP:
+            digitalWrite(this->inPin1, LOW);
+            digitalWrite(this->inPin2, LOW);
+            break;
+    }
 }
