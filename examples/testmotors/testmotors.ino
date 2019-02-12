@@ -44,18 +44,18 @@ void setup() {
 
     for(int i = 0; i < sizeof(testspeeds); i++) { 
         Serial.println("- Speed set to: " + (String)testspeeds[i]);
-        m1->setSpeed(testspeeds[i]);
+        m2->setSpeed(testspeeds[i]);
 
         Serial.println("- - Drive FORWARDS for 2 seconds.");
-        m1->drive(DIR_FWD);
+        m2->drive(DIR_FWD);
         delay(2000);
 
         Serial.println("- - Drive BACKWARDS for 2 seconds.");
-        m1->drive(DIR_BWD);
+        m2->drive(DIR_BWD);
         delay(2000);
 
         Serial.println("- - - Stop for 1 second.");
-        m1->drive(DIR_STOP);
+        m2->drive(DIR_STOP);
         delay(1000);
     }
 }
